@@ -12,13 +12,13 @@ let optionKeyCode: UInt16 = 58
 
 // editable NSTextField
 class Editing: NSTextField {
-    private let commandKey = NSEventModifierFlags.command.rawValue
-    private let commandShiftKey = NSEventModifierFlags.command.rawValue | NSEventModifierFlags.shift.rawValue
+    private let commandKey = NSEvent.ModifierFlags.command.rawValue
+    private let commandShiftKey = NSEvent.ModifierFlags.command.rawValue | NSEvent.ModifierFlags.shift.rawValue
 
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
-        if event.type == NSEventType.keyDown {
+        if event.type == NSEvent.EventType.keyDown {
             if (event.modifierFlags.rawValue &
-                NSEventModifierFlags.deviceIndependentFlagsMask.rawValue) == commandKey {
+                NSEvent.ModifierFlags.deviceIndependentFlagsMask.rawValue) == commandKey {
                 switch event.charactersIgnoringModifiers! {
                 case "x":
                     if NSApp.sendAction(#selector(NSText.cut(_:)), to:nil, from:self) { return true }
@@ -34,7 +34,7 @@ class Editing: NSTextField {
                     break
                 }
             }
-            else if (event.modifierFlags.rawValue & NSEventModifierFlags.deviceIndependentFlagsMask.rawValue) == commandShiftKey {
+            else if (event.modifierFlags.rawValue & NSEvent.ModifierFlags.deviceIndependentFlagsMask.rawValue) == commandShiftKey {
                 if event.charactersIgnoringModifiers == "Z" {
                     if NSApp.sendAction(Selector(("redo:")), to:nil, from:self) { return true }
                 }
@@ -86,7 +86,7 @@ class HeliumPanelController : NSWindowController {
 
     private var currentlyTranslucent: Bool = false {
         didSet {
-            if !NSApplication.shared().isActive {
+            if !NSApplication.shared.isActive {
                 panel.ignoresMouseEvents = currentlyTranslucent
             }
             if currentlyTranslucent {
@@ -111,10 +111,11 @@ class HeliumPanelController : NSWindowController {
         panel.isFloatingPanel = true
 
         let _ = AppleMediaKeyController.init()
-        let app = NSApplication.shared().delegate as! AppDelegate
+        let app = NSApplication.shared.delegate as! AppDelegate
 
-        NotificationCenter.default.addObserver(self, selector: #selector(HeliumPanelController.didBecomeActive), name: NSNotification.Name.NSApplicationDidBecomeActive, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(HeliumPanelController.willResignActive), name: NSNotification.Name.NSApplicationWillResignActive, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(HeliumPanelController.didBecomeActive), name:
+            NSApplication.didBecomeActiveNotification , object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(HeliumPanelController.willResignActive), name: NSApplication.willResignActiveNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(HeliumPanelController.didUpdateTitle(_:)), name: NSNotification.Name(rawValue: "HeliumUpdateTitle"), object: nil)
 
         NotificationCenter.default.addObserver(self, selector: #selector(HeliumPanelController.playPauseNotification(_:)), name: Notification.Name.MediaKeyPlayPause, object: nil)
@@ -127,31 +128,31 @@ class HeliumPanelController : NSWindowController {
         let pref = TranslucencyPreference(rawValue: userDefaults.string(forKey: UserSetting.translucencyPreference.userDefaultsKey) ?? "always")!
         if userDefaults.bool(forKey: UserSetting.translucencyEnabled.userDefaultsKey) {
             didEnableTranslucency()
-            app.translucencyEnabled.state = NSOnState
+            app.translucencyEnabled.state = NSControl.StateValue.on
         } else {
             didDisableTranslucency()
-            app.translucencyEnabled.state = NSOffState
+            app.translucencyEnabled.state = NSControl.StateValue.off
         }
         
         switch pref {
         case TranslucencyPreference.mouseOver:
-            app.translucencyMouseOver.state = NSOnState
+            app.translucencyMouseOver.state = NSControl.StateValue.on
         case TranslucencyPreference.mouseOutside:
-            app.translucencyMouseOutside.state = NSOnState
+            app.translucencyMouseOutside.state = NSControl.StateValue.on
         case TranslucencyPreference.always:
-            app.translucencyAlways.state = NSOnState
+            app.translucencyAlways.state = NSControl.StateValue.on
         }
         translucencyPreference = pref
 
-        app.magicURLMenu.state = userDefaults.bool(forKey: UserSetting.disabledMagicURLs.userDefaultsKey) ? NSOffState : NSOnState
-        app.fullScreenFloatMenu.state = userDefaults.bool(forKey: UserSetting.disabledFullScreenFloat.userDefaultsKey) ? NSOffState : NSOnState
-        app.hideTitleBarMenu.state = userDefaults.bool(forKey: UserSetting.hideTitle.userDefaultsKey) ? NSOnState : NSOffState
+        app.magicURLMenu.state = userDefaults.bool(forKey: UserSetting.disabledMagicURLs.userDefaultsKey) ? NSControl.StateValue.off : NSControl.StateValue.on
+        app.fullScreenFloatMenu.state = userDefaults.bool(forKey: UserSetting.disabledFullScreenFloat.userDefaultsKey) ? NSControl.StateValue.off : NSControl.StateValue.on
+        app.hideTitleBarMenu.state = userDefaults.bool(forKey: UserSetting.hideTitle.userDefaultsKey) ? NSControl.StateValue.on : NSControl.StateValue.off
         
         if let alpha = userDefaults.object(forKey: UserSetting.opacityPercentage.userDefaultsKey) {
             didUpdateAlpha(CGFloat(alpha as! Int))
             let offset = (alpha as! Int)/10 - 1
             for (index, button) in app.percentageMenu.submenu!.items.enumerated() {
-                (button ).state = (offset == index) ? NSOnState : NSOffState
+                (button ).state = (offset == index) ? NSControl.StateValue.on : NSControl.StateValue.off
             }
         }
         
@@ -170,15 +171,15 @@ class HeliumPanelController : NSWindowController {
     }
 
     // MARK: media keys
-    func playPauseNotification(_ notification: Notification) {
+    @objc func playPauseNotification(_ notification: Notification) {
         self.heliumPanel.fireControlEvent(of: .playpause)
     }
 
-    func seekForwardNotification(_ notification: Notification) {
+    @objc func seekForwardNotification(_ notification: Notification) {
         self.heliumPanel.fireControlEvent(of: .right)
     }
 
-    func seekBackwardNotification(_ notification: Notification) {
+    @objc func seekBackwardNotification(_ notification: Notification) {
         self.heliumPanel.fireControlEvent(of: .left)
     }
 
@@ -221,44 +222,44 @@ class HeliumPanelController : NSWindowController {
     private func disabledAllMouseOverPreferences(_ allMenus: [NSMenuItem]) {
         // GROSS HARD CODED
         for x in allMenus.dropFirst(2) {
-            x.state = NSOffState
+            x.state = NSControl.StateValue.off
         }
     }
 
     @IBAction private func alwaysPreferencePress(_ sender: NSMenuItem) {
         disabledAllMouseOverPreferences(sender.menu!.items)
         translucencyPreference = .always
-        sender.state = NSOnState
+        sender.state = NSControl.StateValue.on
     }
     
     @IBAction private func overPreferencePress(_ sender: NSMenuItem) {
         disabledAllMouseOverPreferences(sender.menu!.items)
         translucencyPreference = .mouseOver
-        sender.state = NSOnState
+        sender.state = NSControl.StateValue.on
     }
 
     @IBAction private func outsidePreferencePress(_ sender: NSMenuItem) {
         disabledAllMouseOverPreferences(sender.menu!.items)
         translucencyPreference = .mouseOutside
-        sender.state = NSOnState
+        sender.state = NSControl.StateValue.on
     }
 
     @IBAction private func translucencyPress(_ sender: NSMenuItem) {
-        if sender.state == NSOnState {
-            sender.state = NSOffState
+        if sender.state == NSControl.StateValue.on {
+            sender.state = NSControl.StateValue.off
             didDisableTranslucency()
         }
         else {
-            sender.state = NSOnState
+            sender.state = NSControl.StateValue.on
             didEnableTranslucency()
         }
     }
 
     @IBAction private func percentagePress(_ sender: NSMenuItem) {
         for button in sender.menu!.items{
-            (button ).state = NSOffState
+            (button ).state = NSControl.StateValue.off
         }
-        sender.state = NSOnState
+        sender.state = NSControl.StateValue.on
         let value = sender.title.substring(to: sender.title.index(sender.title.endIndex, offsetBy: -1))
         if let alpha = Int(value) {
              didUpdateAlpha(CGFloat(alpha))
@@ -279,17 +280,17 @@ class HeliumPanelController : NSWindowController {
     }
 
     @IBAction private func floatOverFullScreenAppsToggled(_ sender: NSMenuItem) {
-        sender.state = (sender.state == NSOnState) ? NSOffState : NSOnState
-        userDefaults.set((sender.state == NSOffState), forKey: UserSetting.disabledFullScreenFloat.userDefaultsKey)
+        sender.state = (sender.state == NSControl.StateValue.on) ? NSControl.StateValue.off : NSControl.StateValue.on
+        userDefaults.set((sender.state == NSControl.StateValue.off), forKey: UserSetting.disabledFullScreenFloat.userDefaultsKey)
 
         setFloatOverFullScreenApps()
     }
 
     @IBAction private func hideTitle(_ sender: NSMenuItem) {
-        if sender.state == NSOnState {
-            sender.state = NSOffState
+        if sender.state == NSControl.StateValue.on {
+            sender.state = NSControl.StateValue.off
         } else {
-            sender.state = NSOnState
+            sender.state = NSControl.StateValue.on
         }
 
         userDefaults.set(sender.state, forKey: UserSetting.hideTitle.userDefaultsKey)
@@ -298,7 +299,7 @@ class HeliumPanelController : NSWindowController {
 
     @IBAction private func openFullScreen(_ sender: NSMenuItem) {
         NSLog("Fatal Error: Event Tap could not be created");
-        if let screen = window?.screen ?? NSScreen.main() {
+        if let screen = window?.screen ?? NSScreen.main {
             self.isFullScreen = !self.isFullScreen
             if self.isFullScreen {
                 self.backupFrame = (window?.frame)!
@@ -310,8 +311,8 @@ class HeliumPanelController : NSWindowController {
     }
 
     @IBAction func activateByWindowToggled(_ sender: NSMenuItem) {
-        sender.state = (sender.state == NSOnState) ? NSOffState : NSOnState
-        userDefaults.set((sender.state == NSOnState), forKey: UserSetting.activateByWindow.userDefaultsKey)
+        sender.state = (sender.state == NSControl.StateValue.on) ? NSControl.StateValue.off : NSControl.StateValue.on
+        userDefaults.set((sender.state == NSControl.StateValue.on), forKey: UserSetting.activateByWindow.userDefaultsKey)
         self.setupTitleVisibility()
     }
 
@@ -320,14 +321,14 @@ class HeliumPanelController : NSWindowController {
         let activate = userDefaults.bool(forKey: UserSetting.activateByWindow.userDefaultsKey)
 
         if !hideTitle {
-            panel.styleMask = [NSTitledWindowMask, NSHUDWindowMask, NSUtilityWindowMask, NSResizableWindowMask, ]
+            panel.styleMask = [NSPanel.StyleMask.titled, NSPanel.StyleMask.hudWindow, NSPanel.StyleMask.utilityWindow, NSPanel.StyleMask.resizable, ]
             panel.title = self.webViewController.webView.title ?? ""
         } else {
-            panel.styleMask = [NSBorderlessWindowMask, NSResizableWindowMask, ]
+            panel.styleMask = [NSPanel.StyleMask.borderless, NSPanel.StyleMask.resizable, ]
         }
 
         if !activate {
-            panel.styleMask.insert(NSNonactivatingPanelMask)
+            panel.styleMask.insert(NSPanel.StyleMask.nonactivatingPanel)
         }
     }
 
@@ -348,7 +349,7 @@ class HeliumPanelController : NSWindowController {
         open.canChooseFiles = true
         open.canChooseDirectories = false
         
-        if open.runModal() == NSModalResponseOK {
+        if open.runModal() == NSApplication.ModalResponse.OK {
             if let url = open.url {
                 webViewController.loadURL(url)
             }
@@ -357,7 +358,7 @@ class HeliumPanelController : NSWindowController {
 
     private func didRequestLocation() {
         let alert = NSAlert()
-        alert.alertStyle = NSAlertStyle.informational
+        alert.alertStyle = NSAlert.Style.informational
         alert.messageText = "Enter Destination URL"
 
         let urlField = Editing()
@@ -376,7 +377,7 @@ class HeliumPanelController : NSWindowController {
         alert.addButton(withTitle: "Load")
         alert.addButton(withTitle: "Cancel")
         alert.beginSheetModal(for: self.window!, completionHandler: { response in
-            if response == NSAlertFirstButtonReturn {
+            if response == NSApplication.ModalResponse.alertFirstButtonReturn {
                 // Load
                 let text = (alert.accessoryView as! NSTextField).stringValue
                 self.saveURL(text: text)
@@ -392,7 +393,7 @@ class HeliumPanelController : NSWindowController {
     }
 
     private func didRequestClipboard() {
-        if let contents = NSPasteboard.general().string(forType: NSPasteboardTypeString) {
+        if let contents = NSPasteboard.general.string(forType: NSPasteboard.PasteboardType.string) {
             self.saveURL(text: contents)
             self.webViewController.loadAlmostURL(contents)
         }
@@ -400,7 +401,7 @@ class HeliumPanelController : NSWindowController {
 
     func didRequestChangeHomepage(){
         let alert = NSAlert()
-        alert.alertStyle = NSAlertStyle.informational
+        alert.alertStyle = NSAlert.Style.informational
         alert.messageText = "Enter new Homepage URL"
 
         let urlField = Editing()
@@ -412,7 +413,7 @@ class HeliumPanelController : NSWindowController {
         alert.addButton(withTitle: "Set")
         alert.addButton(withTitle: "Cancel")
         alert.beginSheetModal(for: self.window!, completionHandler: { response in
-            if response == NSAlertFirstButtonReturn {
+            if response == NSApplication.ModalResponse.alertFirstButtonReturn {
                 var text = (alert.accessoryView as! NSTextField).stringValue
 
                 // Add prefix if necessary

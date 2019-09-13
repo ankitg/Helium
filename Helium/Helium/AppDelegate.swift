@@ -37,8 +37,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @IBAction func magicURLRedirectToggled(_ sender: NSMenuItem) {
-        sender.state = (sender.state == NSOnState) ? NSOffState : NSOnState
-        UserDefaults.standard.set((sender.state == NSOffState), forKey: UserSetting.disabledMagicURLs.userDefaultsKey)
+        sender.state = (sender.state == NSControl.StateValue.on) ? NSControl.StateValue.off : NSControl.StateValue.on
+        UserDefaults.standard.set((sender.state == NSControl.StateValue.off), forKey: UserSetting.disabledMagicURLs.userDefaultsKey)
     }
     
     
@@ -47,7 +47,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc func handleURLEvent(_ event: NSAppleEventDescriptor, withReply reply: NSAppleEventDescriptor) {
         
         guard let keyDirectObject = event.paramDescriptor(forKeyword: AEKeyword(keyDirectObject)), let urlString = keyDirectObject.stringValue,
-            let url : String = urlString.substring(from: urlString.characters.index(urlString.startIndex, offsetBy: 9)),
+            let url : String = urlString.substring(from: urlString.index(urlString.startIndex, offsetBy: 9)),
             let urlObject = URL(string:url) else {
             
                 return print("No valid URL to handle")

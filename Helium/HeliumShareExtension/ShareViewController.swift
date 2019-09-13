@@ -32,7 +32,7 @@ class ShareViewController: NSViewController {
 						
 						let heliumURL = components.url!
 						
-						NSWorkspace.shared().open( heliumURL )
+						NSWorkspace.shared.open( heliumURL )
 					}
 					
 			}

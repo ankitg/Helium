@@ -141,7 +141,7 @@ class HeliumPanel : NSPanel {
     }
 
     func fireControlEvent(of type: ControlEventType) {
-        func makeKeyEvent(type: NSEventType, characters: String) -> NSEvent! {
+        func makeKeyEvent(type: NSEvent.EventType, characters: String) -> NSEvent! {
             return NSEvent.keyEvent(with: type,
                                     location: NSPoint(x: 0, y: 0),
                                     modifierFlags: [],
@@ -163,7 +163,7 @@ class HeliumPanel : NSPanel {
 }
 
 class EverenabledMenu : NSMenu {
-    override func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
-        return true
-    }
+//    override func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
+//        return true
+//    }
 }

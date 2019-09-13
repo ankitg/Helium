@@ -16,7 +16,7 @@ class UserJS {
 
     func shouldEmbedAt(url: URL) -> Bool {
         for regex in self.include {
-            if regex.numberOfMatches(in: url.absoluteString, options: [], range: NSMakeRange(0, url.absoluteString.characters.count)) > 0 {
+            if regex.numberOfMatches(in: url.absoluteString, options: [], range: NSMakeRange(0, url.absoluteString.count)) > 0 {
                 return true
             }
         }
@@ -76,21 +76,21 @@ class UserJS {
         let getIncludeExpr = try! NSRegularExpression.init(pattern: "@include\\s+?(.*?)\n", options: [])
         let getRequireExpr = try! NSRegularExpression(pattern: "@require\\s+?(.*?)\n", options: [])
 
-        let headContent = getHeaderExpr.matches(in: userJsContents, options: [], range: NSMakeRange(0, userJsContents.characters.count))
+        let headContent = getHeaderExpr.matches(in: userJsContents, options: [], range: NSMakeRange(0, userJsContents.count))
         if headContent.count == 1 {
-            contents = (userJsContents as NSString).substring(with: headContent.first!.rangeAt(2))
+            contents = (userJsContents as NSString).substring(with: headContent.first!.range(at:2))
 
-            let head = (userJsContents as NSString).substring(with: headContent.first!.rangeAt(1))
-            for includeExpr in getIncludeExpr.matches(in: head, options: [], range: NSMakeRange(0, head.characters.count)) {
-                let expr = (head as NSString).substring(with: includeExpr.rangeAt(1))
+            let head = (userJsContents as NSString).substring(with: headContent.first!.range(at:1))
+            for includeExpr in getIncludeExpr.matches(in: head, options: [], range: NSMakeRange(0, head.count)) {
+                let expr = (head as NSString).substring(with: includeExpr.range(at:1))
                 let regexString = expr.replacingOccurrences(of: "*", with: ".*?")
                 if let regexExpr = try? NSRegularExpression.init(pattern: regexString, options: []) {
                     include.append(regexExpr)
                 }
             }
 
-            for requireExpr in getRequireExpr.matches(in: head, options: [], range: NSMakeRange(0, head.characters.count)) {
-                let expr = (head as NSString).substring(with: requireExpr.rangeAt(1))
+            for requireExpr in getRequireExpr.matches(in: head, options: [], range: NSMakeRange(0, head.count)) {
+                let expr = (head as NSString).substring(with: requireExpr.range(at:1))
                 if let url = URL.init(string: expr.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)) {
                     require.append(url)
                 }
