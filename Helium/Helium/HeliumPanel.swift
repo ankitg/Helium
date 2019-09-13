@@ -27,6 +27,7 @@ class HeliumPanel : NSPanel {
         case down
         case left
         case right
+        case theatre
     }
 
     var heliumDelegate : HeliumPanelDelegate?
@@ -81,6 +82,9 @@ class HeliumPanel : NSPanel {
                     isSendEvent = true
                 } else if keyCode == 126 { //Up
                     type = .up
+                    isSendEvent = true
+                } else if keyCode == 17 { //T for Theatre
+                    type = .theatre
                     isSendEvent = true
                 }
                 if isSendEvent {
@@ -154,7 +158,7 @@ class HeliumPanel : NSPanel {
                                     keyCode: 0)
         }
 
-        let characters = [.up: "", .down: "", .left: "", .right: "", .playpause: " ", ][type]!
+        let characters = [.up: "", .down: "", .left: "", .right: "", .playpause: " ", .theatre: "t" ][type]!
         if self.heliumDelegate?.paneShouldFireEvent(type) ?? true {
             self.keyDown(with: makeKeyEvent(type: .keyDown, characters: characters))
             self.keyUp(with: makeKeyEvent(type: .keyUp, characters: characters))

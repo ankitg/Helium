@@ -12,6 +12,8 @@ import WebKit
 class WebViewController: NSViewController, WKNavigationDelegate, WKUIDelegate, HeliumPanelDelegate {
     var paneShouldInterruptScroll: Bool = false
     var videotagExists = false
+    var isHotstar = false
+    var isCrunchyroll = false
 
     var trackingTag: NSView.TrackingRectTag?
 
@@ -45,7 +47,6 @@ class WebViewController: NSViewController, WKNavigationDelegate, WKUIDelegate, H
         // Listen for load progress
         webView.addObserver(self, forKeyPath: "estimatedProgress", options: NSKeyValueObservingOptions.new, context: nil)
 
-
         clear()
     }
 
@@ -65,7 +66,18 @@ class WebViewController: NSViewController, WKNavigationDelegate, WKUIDelegate, H
     }
 
     func paneShouldFireEvent(_ event: HeliumPanel.ControlEventType) -> Bool {
-        if self.videotagExists {
+        if self.isHotstar {
+            switch event {
+            case .theatre:
+                let _ = self.webView.callJavascriptFunction("__Helium.hsTheatreMode")
+            case .playpause:
+                let _ = self.webView.callJavascriptFunction("__Helium.hsPlayPause")
+            default:
+                print()
+            }
+            
+            return false;
+        } else if self.videotagExists {
             switch event {
             case .playpause:
                 let _ = self.webView.callJavascriptFunction("__Helium.playPause")
@@ -77,8 +89,10 @@ class WebViewController: NSViewController, WKNavigationDelegate, WKUIDelegate, H
                 let _ = self.webView.callJavascriptFunction("__Helium.volumeUp")
             case .down:
                 let _ = self.webView.callJavascriptFunction("__Helium.volumeDown")
+            case .theatre:
+                print("theatre mode")
             }
-
+            
             return false;
         } else {
             return true
@@ -225,6 +239,8 @@ class WebViewController: NSViewController, WKNavigationDelegate, WKUIDelegate, H
         }
 
         self.videotagExists = self.webView.callJavascriptFunction("__Helium.hasVideotag")
+        self.isHotstar = self.webView.callJavascriptFunction("__Helium.isHotstar")
+        self.isCrunchyroll = self.webView.callJavascriptFunction("__Helium.isCrunchyroll")
     }
 
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {

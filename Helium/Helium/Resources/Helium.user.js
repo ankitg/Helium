@@ -40,7 +40,47 @@ var __Helium = {
 
     hasVideotag: function () {
         return document.getElementsByTagName('video').length != 0;
+    },
+    
+    // Hotstar keycodes
+    isHotstar: function() {
+        return document.location.toString().indexOf("hotstar.com") != -1
+    },
+    
+    hsTheatreMode: function() {
+        if(!document.HELIUM_THEATREMODE) {
+            document.getElementsByClassName('header-container')[0].style='display: none';
+            document.getElementsByClassName('detail-area')[0].style='display: none';
+            document.getElementsByClassName('tray-area')[0].style='display: none';
+            document.getElementsByClassName('footer')[0].style='display: none';
+            document.getElementsByClassName('watch-area-inner')[0].style='margin: 0px';
+            document.getElementsByClassName('watch-area-inner')[0].style='padding: 0px';
+            document.HELIUM_THEATREMODE = true;
+        } else {
+            document.getElementsByClassName('header-container')[0].style='display: block';
+            document.getElementsByClassName('detail-area')[0].style='display: block';
+            document.getElementsByClassName('tray-area')[0].style='display: block';
+            document.getElementsByClassName('footer')[0].style='display: block';
+            document.getElementsByClassName('watch-area-inner')[0].style='margin: 0 auto';
+            document.getElementsByClassName('watch-area-inner')[0].style='padding: 10px';
+            document.HELIUM_THEATREMODE = false;
+        }
+    },
+    
+    hsPlayPause: function() {
+        var player = videojs('my_video_1');
+        if(player.paused()) {
+            player.play();
+        } else {
+            player.pause();
+        }
+    },
+    
+    // Crunchyroll keycodes
+    isCrunchyroll: function() {
+        return document.location.toString().indexOf("crunchyroll.com") != -1
     }
+
 }
 
 document.body.setAttribute('ondragstart','return false');
