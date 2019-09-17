@@ -14,6 +14,7 @@ class WebViewController: NSViewController, WKNavigationDelegate, WKUIDelegate, H
     var videotagExists = false
     var isHotstar = false
     var isCrunchyroll = false
+    var isErosnow = false
 
     var trackingTag: NSView.TrackingRectTag?
 
@@ -75,7 +76,22 @@ class WebViewController: NSViewController, WKNavigationDelegate, WKUIDelegate, H
             default:
                 print()
             }
-            
+            return false;
+        } else if self.isCrunchyroll {
+            switch event {
+            case .theatre:
+                let _ = self.webView.callJavascriptFunction("__Helium.crTheatreMode")
+            default:
+                print()
+            }
+            return false;
+        } else if self.isErosnow {
+            switch event {
+            case .theatre:
+                let _ = self.webView.callJavascriptFunction("__Helium.enTheatreMode")
+            default:
+                print()
+            }
             return false;
         } else if self.videotagExists {
             switch event {
@@ -92,7 +108,6 @@ class WebViewController: NSViewController, WKNavigationDelegate, WKUIDelegate, H
             case .theatre:
                 print("theatre mode")
             }
-            
             return false;
         } else {
             return true
@@ -164,7 +179,64 @@ class WebViewController: NSViewController, WKNavigationDelegate, WKUIDelegate, H
     // MARK: Loading
     
     internal func loadURL(_ url:URL) {
-        webView.load(URLRequest(url: url))
+        // Setup block list
+        let blockRules = """
+         [{
+             "trigger": {
+                 "url-filter": "https://www.crunchyroll.com/tracker"
+             },
+             "action": {
+                 "type": "block"
+             }
+         },
+         {
+             "trigger": {
+                 "url-filter": "https://eec.crunchyroll.com/v1/t"
+             },
+             "action": {
+                 "type": "block"
+             }
+         },
+         {
+             "trigger": {
+                 "url-filter": "https://api.segment.io/*"
+             },
+             "action": {
+                 "type": "block"
+             }
+         },
+         {
+             "trigger": {
+                 "url-filter": "https://www.crunchyroll.com/ajax/"
+             },
+             "action": {
+                 "type": "block"
+             }
+         }]
+      """
+        
+        if #available(OSX 10.13, *) {
+            WKContentRuleListStore.default().compileContentRuleList(
+                forIdentifier: "ContentBlockingRules",
+                encodedContentRuleList: blockRules) { (contentRuleList, error) in
+                    
+                    if let error = error {
+                        print(error)
+                        return
+                    }
+                    
+                    let configuration = self.webView.configuration
+                    configuration.userContentController.add(contentRuleList!)
+                    
+                    self.webView.load(URLRequest(url: url))
+            }
+        } else {
+            // Fallback on earlier versions
+            webView.load(URLRequest(url: url))
+        }
+
+        
+        
     }
     
     @objc func loadURLObject(_ urlObject : Notification) {
@@ -241,6 +313,7 @@ class WebViewController: NSViewController, WKNavigationDelegate, WKUIDelegate, H
         self.videotagExists = self.webView.callJavascriptFunction("__Helium.hasVideotag")
         self.isHotstar = self.webView.callJavascriptFunction("__Helium.isHotstar")
         self.isCrunchyroll = self.webView.callJavascriptFunction("__Helium.isCrunchyroll")
+        self.isErosnow = self.webView.callJavascriptFunction("__Helium.isErosnow")
     }
 
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
