@@ -256,7 +256,7 @@ class WebViewController: NSViewController, WKNavigationDelegate, WKUIDelegate, H
             loadAlmostURL(homePage)
         }
         else{
-            loadURL(URL(string: "https://cdn.rawgit.com/JadenGeller/Helium/master/helium_start.html")!)
+            loadURL(URL(string: "https://ankitg.github.io/Helium/helium_start.html")!)
         }
     }
 

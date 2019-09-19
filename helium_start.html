@@ -3,17 +3,48 @@
     <head>
         <style>
             body{
-                background-color:#3399FF;
+                background-color:#151515;
                 color:white;
                 font-family: 'Helvetica Neue'
+            }
+            #grid {
+                display: inline-grid;
+                grid-template-rows: 100px 100px 100px;
+                grid-template-columns: 100px 100px 100px;
+                grid-gap: 25px;
+                justify-items: center;
+                align-items: center;
+            }
+            #grid > div {
+                /* border: 3px solid black; */
+            }
+            #grid > div > a > img {
+                height: 100px;
+                width: 100px;
+                border-radius: 20%;
             }
         </style>
         <title>Helium</title>
     </head>
     <body>
         <center>Navigate to a webpage using the <b>Location</b> menu in the menubar.
-            <br><br>
-            <img src='http://heliumfloats.com/helium_logo.png' style='width:45%'>
+            <br>or simply paste a link here.
+            <br>
+            <br>
+            <div id="grid">
+                <div id="crunchy"><a href="https://www.crunchyroll.com"><img src="./images/crunchyroll.png" alt="crunchyroll logo"/></a></div>
+                <div id="hotstar"><a href="https://us.hotstar.com"><img src="./images/hotstar.png" alt="hotstar logo"/></a></div>
+                <div id="erosnow"><a href="https://erosnow.com"><img src="./images/erosnow.png" alt="eros now logo"/></a></div>
+                <div id="netflix"><a href="https://netflix.com/browse"><img src="./images/netflix.png" alt="netflix logo"/></a></div>
+                <div id="amazon"><a href="https://www.primevideo.com"><img src="./images/primevideo.jpg" alt="amazon prime video logo"/></a></div>
+                <div id="youtube"><a href="https://youtube.com"><img src="./images/youtube.png" alt="youtube logo"/></a></div>
+                <div id="vimeo"><a href="https://vimeo.com"><img src="./images/vimeo.jpg" alt="vimeo logo"/></a></div>
+                <div id="dailymotion"><a href="https://www.dailymotion.com"><img src="./images/dailymotion.png" alt="dailymotion logo"/></a></div>
+                <!-- <div id=""><a href=""><img src="" alt=""/></a></div> -->
+              </div>
+              <br>
+              <br>
+              All images are copyrights of their respective onwers. See icons.txt for source urls.
         </center>
     </body>
 </html>
